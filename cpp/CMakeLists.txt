@@ -76,6 +76,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/version.h.in basix/version.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.h.in basix/cell.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.cpp.in basix/cell.cpp)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/basix)
 
 set(HEADERS_basix
   ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h
