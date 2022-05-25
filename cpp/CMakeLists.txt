@@ -73,10 +73,12 @@ feature_summary(WHAT ALL)
 add_library(basix)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/version.h.in basix/version.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.h.in basix/cell.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.cpp.in basix/cell.cpp)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(HEADERS_basix
-  ${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.h
+  ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h
   ${CMAKE_CURRENT_SOURCE_DIR}/basix/dof-transformations.h
   ${CMAKE_CURRENT_SOURCE_DIR}/basix/element-families.h
   ${CMAKE_CURRENT_SOURCE_DIR}/basix/finite-element.h
@@ -105,7 +107,7 @@ set(HEADERS_basix
   ${CMAKE_CURRENT_BINARY_DIR}/basix/version.h)
 
 target_sources(basix PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/basix/dof-transformations.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/basix/finite-element.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/basix/interpolation.cpp
