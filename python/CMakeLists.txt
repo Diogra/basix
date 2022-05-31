@@ -40,6 +40,14 @@ find_package(pybind11 REQUIRED CONFIG HINTS ${PYBIND11_DIR} ${PYBIND11_ROOT}
 pybind11_add_module(_basixcpp MODULE wrapper.cpp)
 target_link_libraries(_basixcpp PRIVATE Basix::basix)
 
+get_target_property(BASIX_HEADERS basix PRIVATE_HEADER)
+foreach(ITEM ${BASIX_HEADERS})
+  get_filename_component(TMP "${ITEM}" DIRECTORY)
+  list(APPEND BASIX_HEADERS_DIRS ${TMP})
+endforeach()
+list(REMOVE_DUPLICATES BASIX_HEADERS_DIRS)
+target_include_directories(_basixcpp PRIVATE ${BASIX_HEADERS_DIRS})
+
 # Add strict compiler flags
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-Wall -Werror  -Wextra -Wno-comment -pedantic" HAVE_PEDANTIC)

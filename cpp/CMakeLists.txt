@@ -30,6 +30,8 @@ add_feature_info(DOWNLOAD_XTENSOR_LIBS DOWNLOAD_XTENSOR_LIBS "Download xtl and x
 option(XTENSOR_OPTIMIZE "Enable xtensor target-specific optimization" OFF)
 add_feature_info(XTENSOR_OPTIMIZE XTENSOR_OPTIMIZE "Enable architecture-specific optimizations as defined by xtensor.")
 
+set(MAX_DIMENSION 3 CACHE STRING "Maximum topological dimension of cells supported by basix")
+
 # Find dependecies
 set(XTENSOR_MIN_VERSION 0.23.10)
 set(XTL_MIN_VERSION 0.7.0)
@@ -73,10 +75,18 @@ feature_summary(WHAT ALL)
 add_library(basix)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/version.h.in basix/version.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.h.in basix/cell.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.h.cog.in basix/cell.h.cog)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.cpp.in basix/cell.cpp)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/basix)
+
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h"
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h.cog
+  COMMAND python3 -m cogapp -d -o ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h.cog 
+  )
+add_custom_target(gencellhdr DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h")
+add_dependencies(basix gencellhdr)
 
 set(HEADERS_basix
   ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h

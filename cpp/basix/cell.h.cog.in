@@ -25,6 +25,20 @@ enum class type
   hexahedron = 5,
   prism = 6,
   pyramid = 7
+/*[[[cog
+import cog
+if @MAX_DIMENSION@ > 3:
+	cog.out(",// Generated code\n")
+	cog.out("  n0simplex = 0,\n")
+	cog.out("  n1simplex = 1,\n")
+	cog.out("  n2simplex = 2,\n")
+	cog.out("  n3simplex = 3")
+
+	for dim in range(4, @MAX_DIMENSION@ + 1):
+		cog.out(",\n  n{0}simplex = {1}".format(dim,dim+4))
+
+]]]*/
+//[[[end]]]
 };
 
 /// Cell geometry

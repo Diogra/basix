@@ -3,7 +3,7 @@
 // SPDX-License-Identifier:    MIT
 
 #include "docs.h"
-#include <basix/cell.h>
+#include "cell.h"
 #include <basix/element-families.h>
 #include <basix/finite-element.h>
 #include <basix/indexing.h>

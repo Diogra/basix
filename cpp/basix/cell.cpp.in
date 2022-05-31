@@ -3,7 +3,7 @@
 // SPDX-License-Identifier:    MIT
 
 #include "cell.h"
-#include "math.h"
+#include "@CMAKE_CURRENT_SOURCE_DIR@/basix/math.h"
 #include <xtensor/xbuilder.hpp>
 #include <xtensor/xview.hpp>
 
