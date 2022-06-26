@@ -30,7 +30,16 @@ add_feature_info(DOWNLOAD_XTENSOR_LIBS DOWNLOAD_XTENSOR_LIBS "Download xtl and x
 option(XTENSOR_OPTIMIZE "Enable xtensor target-specific optimization" OFF)
 add_feature_info(XTENSOR_OPTIMIZE XTENSOR_OPTIMIZE "Enable architecture-specific optimizations as defined by xtensor.")
 
+# Enable basix to support hyper dimensional cells.
 set(MAX_DIMENSION 3 CACHE STRING "Maximum topological dimension of cells supported by basix")
+
+# Enable hyperdimensional cubical cells.
+option(WITH_N_CUBE "Enable basix suport of N-Cube cells" OFF)
+add_feature_info(N_Cube WITH_N_CUBE "Enable basix support for N dimensional cubical cells up to ${MAX_DIMENSION} dimensions")
+
+# Enable hyperdimensional orthoplex cells.
+option(WITH_N_ORTHOPLEX "Enable basix support of N-Orthoplex cells" OFF)
+add_feature_info(N_Orthoplex WITH_N_ORTHOPLEX "Enable basix support for N dimensional orthoplex cells up to ${MAX_DIMENSION} dimensions")
 
 # Find dependecies
 set(XTENSOR_MIN_VERSION 0.23.10)
@@ -67,7 +76,7 @@ endif()
 
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
-
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
 feature_summary(WHAT ALL)
 
 # Source files
@@ -76,17 +85,25 @@ add_library(basix)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/version.h.in basix/version.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.h.cog.in basix/cell.h.cog)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.cpp.in basix/cell.cpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/basix/cell.cpp.cog.in basix/cell.cpp.cog)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/basix)
 
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h"
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h.cog
-  COMMAND python3 -m cogapp -d -o ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h.cog 
+  COMMAND "${Python3_EXECUTABLE}" -m cogapp -d -o ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h.cog 
   )
 add_custom_target(gencellhdr DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h")
 add_dependencies(basix gencellhdr)
+
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.cpp
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.cpp.cog
+  COMMAND "${Python3_EXECUTABLE}" -m cogapp -d -o ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.cpp ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.cpp.cog
+  )
+#add_custom_target(gencellcpp DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/basix/cell.cpp")
+#add_dependencies(basix gencellcpp)
 
 set(HEADERS_basix
   ${CMAKE_CURRENT_BINARY_DIR}/basix/cell.h

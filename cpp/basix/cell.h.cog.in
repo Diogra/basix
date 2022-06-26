@@ -32,10 +32,28 @@ if @MAX_DIMENSION@ > 3:
 	cog.out("  n0simplex = 0,\n")
 	cog.out("  n1simplex = 1,\n")
 	cog.out("  n2simplex = 2,\n")
-	cog.out("  n3simplex = 3")
+	cog.out("  n3simplex = 3,\n")
+	if '@WITH_N_CUBE@' == 'ON':
+		cog.out("  n0cube = 0,\n")
+		cog.out("  n1cube = 1,\n")
+		cog.out("  n2cube = 4,\n")
+		cog.out("  n3cube = 5,\n")
+	if '@WITH_N_ORTHOPLEX@' == 'ON':
+		cog.out("  n0orthoplex = 0,\n")
+		cog.out("  n1orthoplex = 1,\n")
+		cog.out("  n2orthoplex = 4,\n")
+		cog.out("  n3orthoplex = {},\n".format(8 + 2 * (@MAX_DIMENSION@ - 3)))
 
 	for dim in range(4, @MAX_DIMENSION@ + 1):
-		cog.out(",\n  n{0}simplex = {1}".format(dim,dim+4))
+		cog.out("  n{0}simplex = {1},\n".format(dim,dim+4))
+		
+	if '@WITH_N_CUBE@' == 'ON':
+		for dim in range(4, @MAX_DIMENSION@ + 1):
+			cog.out("  n{0}cube = {1},\n".format(dim,dim + 1 + @MAX_DIMENSION@))
+		
+	if '@WITH_N_ORTHOPLEX@' == 'ON':
+		for dim in range(4, @MAX_DIMENSION@ + 1):
+			cog.out("  n{0}orthoplex = {1},\n".format(dim,dim + 5 + 2 * (@MAX_DIMENSION@ - 3)))
 
 ]]]*/
 //[[[end]]]

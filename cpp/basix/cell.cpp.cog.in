@@ -26,6 +26,69 @@ xt::xtensor<double, 2> cell::geometry(cell::type celltype)
   case cell::type::tetrahedron:
     return xt::xtensor<double, 2>(
         {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}});
+  /*[[[cog
+import cog
+if @MAX_DIMENSION@ > 3:
+
+	# Text generation of return values for simplex type cells.
+  	
+	for celln in range(4, @MAX_DIMENSION@ + 1):
+  		cog.out("case cell::type::n{}simplex:\n".format(celln))
+  		cog.out("  return xt::xtensor<double, 2>(\n")
+  		text2 = "      {{0.0"
+  		for dimk in range(1,celln):
+  			text2 = text2 + ", 0.0"
+  		cog.out(text2 + "},\n")
+  		for diml in range(0,celln):
+  			cog.out("      {")
+  			for dimk in range(0,celln):
+  				if dimk != 0:
+  					cog.out(", ")
+  				if diml == dimk :
+  					cog.out("1.0")
+  				else:
+  					cog.out("0.0")
+  			if diml != celln - 1:
+  				cog.out("},\n")
+  		cog.out("}});\n")
+  	
+	# Text generation of return values for hypercube type cells.
+	if '@WITH_N_CUBE@' == 'ON':
+	
+		origin = [0] * @MAX_DIMENSION@
+		vertlist = [origin]
+	
+		for dimn in range(1, @MAX_DIMENSION@ + 1):
+			base = origin.copy()
+			base[dimn - 1] = 1
+			vertmax = len(vertlist)
+			for vertindex in range(0,vertmax):
+				vertlist.append([i+q for i,q in zip(vertlist[vertindex],base)])
+			if dimn > 3:
+				text = "case cell::type::n{}cube:\n".format(dimn)
+				text += "  return xt::xtensor<double, 2>(\n"
+				text += "      {"
+				maxvert = len(vertlist)
+				for vern in range(0,maxvert):
+					text += "{"
+					for dimk in range(0, dimn):
+						text += "{:3.1f}".format(vertlist[vern][dimk])
+						if dimk != dimn - 1:
+							text += ", "
+					if vern < maxvert -1:
+						text += "},\n      "
+				text += "}});\n"
+				cog.out(text)
+		
+  	# Text generation of return values for orthoplex type cells.
+	if '@WITH_N_ORTHOPLEX@'	== 'ON':
+	
+		for dimn in range(4, @MAX_DIMENSION@):
+			cog.out("case cell::type::n{}orthoplex:\n".format(dimn))
+			cog.out("  return xt::xtensor<double, 2>(\n")
+			cog.out("      );\n")	  				
+  ]]]*/
+  //[[[end]]]
   case cell::type::prism:
     return xt::xtensor<double, 2>({{0.0, 0.0, 0.0},
                                    {1.0, 0.0, 0.0},
@@ -138,6 +201,64 @@ std::vector<std::vector<std::vector<int>>> cell::topology(cell::type celltype)
     t[3] = {{0, 1, 2, 3, 4, 5, 6, 7}};
     return t;
   }
+  /*[[[cog
+  import cog
+  import math
+  import itertools
+  if @MAX_DIMENSION@ > 3 :
+  	
+  	# Text generation of return values for simplex type cells.
+  	
+  	for dimn in range(4, @MAX_DIMENSION@ + 1):
+  		cog.out("case cell::type::n{}simplex:\n".format(dimn))
+  		cog.out("{\n")
+  		cog.out("  std::vector<std::vector<std::vector<int>>> t({});\n".format(dimn+1))
+  		vertlist = list(range(dimn+1))
+  		  		
+  		# loop over all possible dimensions of sub entitities
+  		for dimk in range(0,dimn+1):
+  			vertcomb = list(itertools.combinations(vertlist,dimk+1))
+  			cog.out("  // n{}simplex \n".format(dimk))
+  			cog.out("  t[{}] = ".format(dimk))
+  			cog.out("{")
+  			
+  			# loop over sub elements of dimension dimk
+  			lnamax = math.comb(dimn+1,dimk+1)
+  			for lna in range(0,lnamax):
+  				cog.out("{")
+  				
+  				# loop over verticies in sub element of dimension dimk
+  				for lnb in range(0,dimk+1):
+  					cog.out("{}".format(vertcomb[lna][lnb]))
+  					if lnb != dimk:
+  						cog.out(", ")
+  				cog.out("}")
+  				if lna != lnamax-1:
+  					cog.out(", ")
+  			cog.out("};\n")
+  		cog.out("  return t;\n")
+  		cog.out("}\n")
+  	
+  	# Text generation of return values for cubical type cells.
+  	
+  	if '@WITH_N_CUBE@' == 'ON':
+  		for dimn in range(4, @MAX_DIMENSION@ + 1):
+  			cog.out("case cell::type::n{}cube:\n".format(dimn))
+  			cog.out("{\n")
+  			cog.out("  std::vector<std::vector<std::vector<int>>> t({});\n".format(dimn+1))
+  			vertlist = [i for i in range(0, dimn)]
+  			for dimk in range(0, dimn + 1):
+  				cog.out("  // n{}cube\n".format(dimk))
+  				cog.out("  t[{}] = ".format(dimk))
+  				cog.out("{\n")
+  				for entityn in range(0, math.comb(dimn,dimk)*2**(dimn-dimk)):
+  					cog.out("{")
+  					cog.out("},")
+  				cog.out("\n         };\n")
+  			cog.out("  return t;\n")
+  			cog.out("}\n")
+  ]]]*/
+  ///[[[end]]]
   default:
     throw std::runtime_error("Unsupported cell type");
   }
@@ -315,6 +436,19 @@ int cell::topological_dimension(cell::type cell_type)
     return 3;
   case cell::type::pyramid:
     return 3;
+  /*[[[cog
+  import cog
+  if @MAX_DIMENSION@ > 3 :
+  	for dimn in range(4, @MAX_DIMENSION@ + 1):
+  		cog.out("  case cell::type::n{}simplex:\n".format(dimn))
+  		cog.out("    return {};\n".format(dimn))
+  	
+  	if '@WITH_N_CUBE@' == 'ON':
+  		for dimn in range(4, @MAX_DIMENSION@ + 1):
+  			cog.out("  case cell::type::n{}cube:\n".format(dimn))
+  			cog.out("    return {};\n".format(dimn))
+  ]]]*/
+  //[[[end]]]
   default:
     throw std::runtime_error("Unsupported cell type");
   }
@@ -358,14 +492,37 @@ cell::type cell::sub_entity_type(cell::type celltype, int dim, int index)
     return celltype;
 
   const std::vector<std::vector<std::vector<int>>> t = cell::topology(celltype);
-  switch (t[dim][index].size())
+  
+  switch (dim)
   {
-  case 3:
-    return cell::type::triangle;
-  case 4:
-    return cell::type::quadrilateral;
-  default:
-    throw std::runtime_error("Error in sub_entity_type");
+    case 2:
+      switch (t[dim][index].size())
+      {
+      case 3:
+        return cell::type::triangle;
+      case 4:
+        return cell::type::quadrilateral;
+      default:
+        throw std::runtime_error("Error in sub_entity_type");
+      }
+    /*[[[cog
+    import cog
+    if @MAX_DIMENSION@ > 3:
+    	for dimn in range(3, @MAX_DIMENSION@):
+    		cog.out("case {}:\n".format(dimn))
+    		cog.out("  switch (t[dim][index].size())\n")
+    		cog.out("  {\n")
+    		cog.out("  case {}:\n".format(dimn + 1))
+    		cog.out("    return cell::type::n{}simplex;\n".format(dimn))
+    		cog.out("  case {}:\n".format(2**dimn))
+    		cog.out("    return cell::type::n{}cube;\n".format(dimn))
+    		cog.out("  default:")
+    		cog.out("    throw std::runtime_error(\"Error in sub_entity_type\");")
+    		cog.out("  }\n")
+    ]]]*/
+    ///[[[end]]]
+    default:
+      throw std::runtime_error("Error in sub_entity_type");
   }
 }
 //-----------------------------------------------------------------------------
@@ -389,6 +546,15 @@ double cell::volume(cell::type cell_type)
     return 0.5;
   case cell::type::pyramid:
     return 1.0 / 3;
+  /*[[[cog
+  import cog
+  import math
+  if @MAX_DIMENSION@ > 3:
+  	for dimn in range(4, @MAX_DIMENSION@ +1):
+  		cog.out("case cell::type::n{}simplex:\n".format(dimn))
+  		cog.out("  return 1.0 / {};".format(math.factorial(dimn)))
+  ]]]*/
+  //[[[end]]]
   default:
     throw std::runtime_error("Unsupported cell type");
   }
@@ -544,6 +710,34 @@ std::vector<std::vector<cell::type>> cell::subentity_types(cell::type cell_type)
             {cell::type::quadrilateral, cell::type::triangle,
              cell::type::triangle, cell::type::triangle, cell::type::triangle},
             {cell::type::pyramid}};
+  /*[[[cog
+  import cog
+  import math
+  if @MAX_DIMENSION@ > 3 :
+  	for dimn in range(4, @MAX_DIMENSION@ +1):
+  		cog.out("case cell::type::n{}simplex:\n".format(dimn))
+  		cog.out("  return {")
+  		for dimk in range(0, dimn + 1):
+  			cog.out("{")
+  			lnamax = math.comb(dimn+1,dimk+1)
+  			txtcount = 0
+  			for lna in range(0, lnamax):
+  				cog.out(" cell::type::n{}simplex".format(dimk))
+  				if lna != lnamax-1:
+  					cog.out(",")
+  				if txtcount < 3:
+  					txtcount = txtcount +1
+  				else:
+  					cog.out("\n          ")
+  					txtcount = 0
+  			cog.out("}")
+  			if dimk != dimn:
+  				cog.out(",\n")
+  				cog.out("          ")
+  		cog.out("};\n")
+  		
+  ]]]*/
+  //[[[end]]]
   default:
     throw std::runtime_error("Unsupported cell type");
   }
